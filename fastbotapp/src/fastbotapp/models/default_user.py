@@ -1,0 +1,3 @@
+from .user import User
+
+class DefaultUser(User):...
