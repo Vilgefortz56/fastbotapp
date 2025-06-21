@@ -1,7 +1,33 @@
+#[project]
+#name = "tg-framework"
+#version = "0.1.0"
+#description = "Add your description here"
+#readme = "README.md"
+#requires-python = ">=3.12"
+#dependencies = [
+#    "aiogram>=3.20.0.post0",
+#    "aiosqlite>=0.21.0",
+#   "fastapi[standard]>=0.115.12",
+#   "pydantic-settings>=2.9.1",
+#    "setuptools>=80.9.0",
+#    "sqlmodel>=0.0.24",
+#    "ujson>=5.10.0",
+#]
+
+#[tool.uv.workspace]
+#members = [
+#    "fastbot",
+#]
+
+[build-system]
+requires = ["setuptools>=80.9", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "tg-framework"
-version = "0.1.0"
-description = "Add your description here"
+name = "fastbotapp"
+version = "0.0.1"
+description = "Telegram Bot Application Framework"
+authors = [{name = "Сергей", email = "ckoshkin@yandex.ru"}]
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
@@ -9,12 +35,13 @@ dependencies = [
     "aiosqlite>=0.21.0",
     "fastapi[standard]>=0.115.12",
     "pydantic-settings>=2.9.1",
-    "setuptools>=80.9.0",
     "sqlmodel>=0.0.24",
     "ujson>=5.10.0",
 ]
 
-[tool.uv.workspace]
-members = [
-    "fastbot",
-]
+
+[tool.setuptools.packages.find]
+where = ["fastbotapp/src"]
+
+[tool.setuptools.package-dir]
+"" = "fastbotapp/src"
