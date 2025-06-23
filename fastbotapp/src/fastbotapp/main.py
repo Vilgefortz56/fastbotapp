@@ -1,4 +1,3 @@
-
 from contextlib import asynccontextmanager
 import logging
 
@@ -25,6 +24,7 @@ class BotApp(FastAPI):
         settings: Settings,
         user_class: type[User] = None,
         allowed_updates: list[str] | None = None, 
+        fsm_storage: Dbstorage = Dbstorage(),
         **kwargs
     ):
         if user_class is None:
@@ -34,7 +34,7 @@ class BotApp(FastAPI):
         self.user_class = user_class
         self.settings = settings
         self.bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-        self.dp = Dispatcher(storage=Dbstorage())
+        self.dp = Dispatcher(storage=fsm_storage)
         self.allowed_updates = allowed_updates or ["message", "callback_query"]
 
         self.dp.update.middleware(WebhookMiddleware(self, async_session))
@@ -55,7 +55,6 @@ class BotApp(FastAPI):
         await close_db()
 
     async def set_webhook(self):
-        print(f"Урл вебхука: {self.settings.TELEGRAM_WEBHOOK_URL}")
         await self.bot.set_webhook(
             url=f"{self.settings.TELEGRAM_WEBHOOK_URL}/telegram/webhook",
             drop_pending_updates=True,
