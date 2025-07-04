@@ -25,6 +25,7 @@ class BotApp(FastAPI):
         user_class: type[User] = None,
         allowed_updates: list[str] | None = None, 
         fsm_storage: Dbstorage = Dbstorage(),
+        telegram_webhook_path: str = "/telegram/webhook",
         **kwargs
     ):
         if user_class is None:
@@ -33,6 +34,7 @@ class BotApp(FastAPI):
 
         self.user_class = user_class
         self.settings = settings
+        self.telegram_webhook_path = telegram_webhook_path
         self.bot = Bot(token=settings.TELEGRAM_BOT_TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
         self.dp = Dispatcher(storage=fsm_storage)
         self.allowed_updates = allowed_updates or ["message", "callback_query"]
@@ -41,7 +43,7 @@ class BotApp(FastAPI):
 
         super().__init__(lifespan=self.default_lifespan, **kwargs)
 
-        self.add_api_route(path="/telegram/webhook", endpoint=self._webhook_handler, methods=["POST"])
+        self.add_api_route(path=self.telegram_webhook_path , endpoint=self._webhook_handler, methods=["POST"])
 
     @asynccontextmanager
     async def default_lifespan(self, app: FastAPI):
@@ -56,7 +58,7 @@ class BotApp(FastAPI):
 
     async def set_webhook(self):
         await self.bot.set_webhook(
-            url=f"{self.settings.TELEGRAM_WEBHOOK_URL}/telegram/webhook",
+            url=f"{self.settings.TELEGRAM_WEBHOOK_URL}{self.telegram_webhook_path}",
             drop_pending_updates=True,
             allowed_updates=self.allowed_updates,
             secret_token=self.settings.TELEGRAM_WEBHOOK_AUTH_KEY,
