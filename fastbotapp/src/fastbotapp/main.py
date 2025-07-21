@@ -5,7 +5,7 @@ from fastapi import  FastAPI, Request, Response
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
-from aiogram.types import Update
+from aiogram.types import Update, BotCommand
 
 from .config import Settings
 from .db import close_db, async_session, init_db
@@ -26,12 +26,14 @@ class BotApp(FastAPI):
         allowed_updates: list[str] | None = None, 
         fsm_storage: Dbstorage = Dbstorage(),
         telegram_webhook_path: str = "/telegram/webhook",
+        bot_commands: list[BotCommand] | None = None,
         **kwargs
     ):
         if user_class is None:
             from .models.default_user import DefaultUser
             user_class = DefaultUser
 
+        self.bot_commands = bot_commands
         self.user_class = user_class
         self.settings = settings
         self.telegram_webhook_path = telegram_webhook_path
@@ -49,6 +51,7 @@ class BotApp(FastAPI):
     async def default_lifespan(self, app: FastAPI):
         logger.info("Запуск приложения BotApp")
         await init_db()
+        await self.set_bot_commands()
         await self.set_webhook()
         yield
         logger.info("Остановка приложения BotApp")
@@ -91,6 +94,9 @@ class BotApp(FastAPI):
             return Response(status_code=400)
     
    
+    async def set_bot_commands(self):
+        if self.bot_commands:
+            await self.bot.set_my_commands(self.bot_commands)
 
     # async def get_user(self, user_id: int) -> Optional[User]:
     #     """Получение пользователя из базы данных"""
